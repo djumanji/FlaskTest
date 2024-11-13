@@ -1,9 +1,26 @@
-from flask import Flask, render_template # type: ignore
-
+from flask import Flask, request, redirect, render_template # type: ignore
+import sqlite3
+import re
 app = Flask(__name__)
 @app.route('/')
 def home():
     return render_template('home.html')
 
+@app.route('/subscribe', methods=['POST'])
+def subscribe():
+    email = request.form.get('email')
+    if email and re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        try:
+            with sqlite3.connect('email.db') as conn:
+                cursor = conn.cursor()
+                cursor.execute('CREATE TABLE IF NOT EXISTS subscribers (email TEXT)')
+                cursor.execute('INSERT INTO subscribers (email) VALUES (?)',(email,))
+                conn.commit()
+            return redirect('/')
+        except sqlite3.IntegrityError:
+            return "Email already subscribed", 409
+        
+    return "Invalid email", 400
+        
 if __name__ == '__main__':
     app.run(debug=False)
