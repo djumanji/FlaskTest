@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template # type: ignore
+from flask import Flask, request, jsonify, render_template
 import sqlite3
 import re
 
@@ -22,18 +22,20 @@ def home():
 
 @app.route('/subscribe', methods=['POST'])
 def subscribe():
-    email = request.form.get('email')
+    data = request.get_json()
+    email = data.get('email')
     if email and re.match(r"[^@]+@[^@]+\.[^@]+", email):
         try:
             with sqlite3.connect('email.db') as conn:
                 cursor = conn.cursor()
                 cursor.execute('INSERT INTO subscribers (email) VALUES (?)',(email,))
                 conn.commit()
-            return redirect('/')
+            return jsonify({'message': 'Subscrption Success!'}),200
+        
         except sqlite3.IntegrityError:
-            return "Email already subscribed", 409
+            return jsonify({'message': 'email already subscribed'}),409
 
-    return "Invalid email", 400
+    return jsonify({'message':'invalid email'}),400
         
 if __name__ == '__main__':
     init_db()

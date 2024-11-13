@@ -12,11 +12,32 @@
 <body>
   <h1>Welcome to My Personal Blog!</h1>
   <p>This is my first end to end website!</p>
-  <form action="/subscribe" method="POST">
+  <form id="subscribeForm">
     <label for="email">Subscribe to my newsletter:</label><br>
     <input type="email" id="email" name="email" required>
     <input type="submit" value="Subscribe">
   </form>
+  <script>
+    document.getElementById('subscribeForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      fetch('/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email
+        })
+      }).then(response => {
+        if (response.ok) {
+          window.locaiton.href = '/';
+        } else {
+          alert('Subscrpion failed');
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
