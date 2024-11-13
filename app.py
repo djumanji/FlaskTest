@@ -1,10 +1,11 @@
 from flask import Flask, request, redirect, render_template # type: ignore
 import sqlite3
 import re
+
 app = Flask(__name__)
 
 def init_db():
-    with sqlite3.conntect('email.db') as conn:
+    with sqlite3.connect('email.db') as conn:
         cursor = conn.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS subscribers (
@@ -25,14 +26,15 @@ def subscribe():
     if email and re.match(r"[^@]+@[^@]+\.[^@]+", email):
         try:
             with sqlite3.connect('email.db') as conn:
-                cursor.conn.cursor()
+                cursor = conn.cursor()
                 cursor.execute('INSERT INTO subscribers (email) VALUES (?)',(email,))
                 conn.commit()
             return redirect('/')
         except sqlite3.IntegrityError:
             return "Email already subscribed", 409
-        
+
     return "Invalid email", 400
         
 if __name__ == '__main__':
+    init_db()
     app.run(debug=False)
